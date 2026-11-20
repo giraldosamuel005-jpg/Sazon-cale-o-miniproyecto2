@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "Cocina";
+    var cola = (Queue<Orden>)ViewBag.Cola;
+    var enPreparacion = (List<Orden>)ViewBag.EnPreparacion;
+    var listas = (List<Orden>)ViewBag.Listas;
+    var siguiente = cola.Count > 0 ? cola.Peek() : null; // Peek: ver la siguiente sin sacarla.
+}
+@section Head {
+    <meta http-equiv="refresh" content="20" />
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <div>
+        <h1 class="h3 mb-0">Cocina</h1>
+        <small class="text-muted">Se actualiza cada 20 s · @cola.Count en cola</small>
+    </div>
+    <form asp-action="TomarSiguiente" method="post">
+        <button class="btn btn-marca btn-lg" @(siguiente is null ? "disabled" : "")>
+            <i class="bi bi-skip-forward-fill"></i> Tomar siguiente
+            @if (siguiente is not null) { <span class="badge text-bg-light">Mesa @siguiente.Mesa?.Numero</span> }
+        </button>
+    </form>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-lg-4">
+        <h2 class="h5"><i class="bi bi-hourglass-split text-warning"></i> En cola (FIFO)</h2>
+        @{ var posicion = 1; }
+        @foreach (var o in cola)
+        {
+            <div class="card ticket mb-2 p-2">
+                <div class="d-flex justify-content-between">
+                    <strong>@posicion. Mesa @o.Mesa?.Numero</strong>
+                    <small class="text-muted">#@o.Id · @o.MinutosEspera min</small>
+                </div>
+                <ul class="list-unstyled small mb-0">
+                    @foreach (var d in o.Detalles) { <li>@d.Cantidad × @d.Producto?.Nombre</li> }
+                </ul>
+                @if (!string.IsNullOrEmpty(o.Notas)) { <div class="small text-danger"><i class="bi bi-chat-left-text"></i> @o.Notas</div> }
+            </div>
+            posicion++;
+        }
+        @if (cola.Count == 0) { <p class="text-muted">Sin órdenes en cola.</p> }
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+        <h2 class="h5"><i class="bi bi-fire text-info"></i> Preparando</h2>
+        @foreach (var o in enPreparacion)
+        {
+            <div class="card ticket preparando mb-2 p-2">
+                <div class="d-flex justify-content-between">
+                    <strong>Mesa @o.Mesa?.Numero</strong>
+                    <small class="text-muted">#@o.Id · @o.MinutosEspera min</small>
+                </div>
+                <ul class="list-unstyled small mb-2">
+                    @foreach (var d in o.Detalles) { <li>@d.Cantidad × @d.Producto?.Nombre</li> }
+                </ul>
+                @if (!string.IsNullOrEmpty(o.Notas)) { <div class="small text-danger mb-2"><i class="bi bi-chat-left-text"></i> @o.Notas</div> }
+                <form asp-action="MarcarLista" asp-route-id="@o.Id" method="post" class="d-grid">
+                    <button class="btn btn-sm btn-success"><i class="bi bi-bell"></i> Marcar lista</button>
+                </form>
+            </div>
+        }
+        @if (!enPreparacion.Any()) { <p class="text-muted">Nada en preparación.</p> }
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+        <h2 class="h5"><i class="bi bi-bell-fill text-success"></i> Listas para entregar</h2>
+        @foreach (var o in listas)
+        {
+            <div class="card ticket lista mb-2 p-2">
+                <div class="d-flex justify-content-between">
+                    <strong>Mesa @o.Mesa?.Numero</strong>
+                    <small class="text-muted">#@o.Id · @o.MeseroNombre</small>
+                </div>
+            </div>
+        }
+        @if (!listas.Any()) { <p class="text-muted">Ninguna pendiente de entrega.</p> }
+    </div>
+</div>
