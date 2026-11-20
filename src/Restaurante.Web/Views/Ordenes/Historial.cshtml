@@ -1,0 +1,30 @@
+@model List<Orden>
+@{
+    ViewData["Title"] = "Historial de órdenes";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Historial (últimas 50)</h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr><th>#</th><th>Fecha</th><th>Mesa</th><th class="d-none d-md-table-cell">Mesero</th><th>Estado</th><th class="text-end">Total</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr>
+                        <td><a asp-action="Detalle" asp-route-id="@o.Id">@o.Id</a></td>
+                        <td class="text-nowrap">@o.CreadoEn.ToString("dd/MM hh:mm tt")</td>
+                        <td>@o.Mesa?.Numero</td>
+                        <td class="d-none d-md-table-cell">@o.MeseroNombre</td>
+                        <td><span class="badge text-bg-@o.Estado.ColorBootstrap()">@o.Estado.Nombre()</span></td>
+                        <td class="text-end">@o.Total.Pesos()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,105 @@
+@model CrearOrdenViewModel
+@{
+    ViewData["Title"] = "Nueva orden";
+}
+<h1 class="h3 mb-3">Nueva orden</h1>
+
+<form asp-action="Crear" method="post" id="formOrden">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
+
+    <div class="card p-3 mb-3">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <label asp-for="MesaId" class="form-label fw-semibold"></label>
+                <select asp-for="MesaId" class="form-select"
+                        asp-items="Model.MesasLibres.Select(m => new SelectListItem(m.ToString(), m.Id.ToString()))">
+                    <option value="">-- Seleccione --</option>
+                </select>
+                <span asp-validation-for="MesaId" class="text-danger small"></span>
+                @if (!Model.MesasLibres.Any())
+                {
+                    <small class="text-danger">No hay mesas libres en este momento.</small>
+                }
+            </div>
+            <div class="col-12 col-md-8">
+                <label asp-for="Notas" class="form-label fw-semibold"></label>
+                <input asp-for="Notas" class="form-control" placeholder="Ej: sin cebolla, término medio..." />
+            </div>
+        </div>
+    </div>
+
+    @{ var i = 0; }
+    @foreach (var grupo in Model.Items.GroupBy(x => x.Categoria))
+    {
+        <h2 class="h5 mt-3 text-marca">@grupo.Key.Nombre()</h2>
+        <div class="row g-2">
+            @foreach (var item in grupo)
+            {
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card producto-item h-100 p-2" data-precio="@item.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                        <input type="hidden" name="Items[@i].ProductoId" value="@item.ProductoId" />
+                        <div class="d-flex justify-content-between align-items-center gap-2">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">@item.Nombre</div>
+                                @if (!string.IsNullOrEmpty(item.Descripcion))
+                                {
+                                    <div class="small text-muted">@item.Descripcion</div>
+                                }
+                                <div class="small">@item.Precio.Pesos()</div>
+                            </div>
+                            <div class="input-group input-group-sm selector-cantidad">
+                                <button type="button" class="btn btn-outline-secondary btn-menos" aria-label="Quitar">−</button>
+                                <input type="number" name="Items[@i].Cantidad" value="@item.Cantidad" min="0" max="50"
+                                       class="form-control cantidad" aria-label="Cantidad de @item.Nombre" />
+                                <button type="button" class="btn btn-outline-secondary btn-mas" aria-label="Agregar">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                i++;
+            }
+        </div>
+    }
+
+    <div class="total-fijo mt-3 p-3 d-flex flex-wrap justify-content-between align-items-center gap-2 rounded-top">
+        <div>
+            <span class="text-muted">Productos: <strong id="cantidadTotal">0</strong></span>
+            <span class="ms-3 fs-5">Total: <strong id="valorTotal" class="text-marca">$ 0</strong></span>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-marca"><i class="bi bi-send"></i> Enviar a cocina</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Calcula el total en vivo mientras el mesero agrega productos.
+        (function () {
+            const formato = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+            const tarjetas = document.querySelectorAll('.producto-item');
+
+            function recalcular() {
+                let total = 0, cantidad = 0;
+                tarjetas.forEach(t => {
+                    const input = t.querySelector('.cantidad');
+                    const n = Math.max(0, parseInt(input.value) || 0);
+                    total += n * parseFloat(t.dataset.precio);
+                    cantidad += n;
+                    t.classList.toggle('seleccionado', n > 0);
+                });
+                document.getElementById('valorTotal').textContent = formato.format(total);
+                document.getElementById('cantidadTotal').textContent = cantidad;
+            }
+
+            tarjetas.forEach(t => {
+                const input = t.querySelector('.cantidad');
+                t.querySelector('.btn-mas').addEventListener('click', () => { input.value = Math.min(50, (parseInt(input.value) || 0) + 1); recalcular(); });
+                t.querySelector('.btn-menos').addEventListener('click', () => { input.value = Math.max(0, (parseInt(input.value) || 0) - 1); recalcular(); });
+                input.addEventListener('input', recalcular);
+            });
+            recalcular();
+        })();
+    </script>
+}

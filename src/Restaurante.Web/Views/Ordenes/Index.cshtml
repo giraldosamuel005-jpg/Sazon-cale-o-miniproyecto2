@@ -1,0 +1,70 @@
+@model List<Orden>
+@{
+    ViewData["Title"] = "Órdenes";
+}
+@section Head {
+    <meta http-equiv="refresh" content="30" />
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h3 mb-0">Órdenes activas</h1>
+    <div class="d-flex gap-2">
+        <a asp-action="Historial" class="btn btn-outline-secondary"><i class="bi bi-clock-history"></i> Historial</a>
+        <a asp-action="Crear" class="btn btn-marca"><i class="bi bi-plus-lg"></i> Nueva orden</a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card p-5 text-center text-muted">
+        <i class="bi bi-inbox" style="font-size:3rem"></i>
+        <p class="mb-0">No hay órdenes activas. ¡Tome la primera!</p>
+    </div>
+}
+
+<div class="row g-3">
+    @foreach (var o in Model)
+    {
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="card h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Mesa @o.Mesa?.Numero <small class="text-muted fw-normal">· Orden #@o.Id</small></span>
+                    <span class="badge text-bg-@o.Estado.ColorBootstrap()">@o.Estado.Nombre()</span>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small mb-2">
+                        @foreach (var d in o.Detalles)
+                        {
+                            <li>@d.Cantidad × @d.Producto?.Nombre</li>
+                        }
+                    </ul>
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span><i class="bi bi-person"></i> @o.MeseroNombre</span>
+                        <span><i class="bi bi-clock"></i> @o.MinutosEspera min</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <span class="fw-bold">@o.Total.Pesos()</span>
+                    <div class="d-flex gap-1">
+                        <a asp-action="Detalle" asp-route-id="@o.Id" class="btn btn-sm btn-outline-secondary">Ver</a>
+                        @if (o.Estado == EstadoOrden.Lista)
+                        {
+                            <form asp-action="Entregar" asp-route-id="@o.Id" method="post">
+                                <button class="btn btn-sm btn-success"><i class="bi bi-check2"></i> Entregar</button>
+                            </form>
+                        }
+                        @if (o.Estado == EstadoOrden.Entregada)
+                        {
+                            <a asp-controller="Facturas" asp-action="Cobrar" asp-route-id="@o.Id" class="btn btn-sm btn-marca"><i class="bi bi-cash"></i> Cobrar</a>
+                        }
+                        @if (o.PuedeCambiarA(EstadoOrden.Cancelada))
+                        {
+                            <form asp-action="Cancelar" asp-route-id="@o.Id" method="post" onsubmit="return confirm('¿Cancelar la orden #@o.Id?');">
+                                <button class="btn btn-sm btn-outline-danger" title="Cancelar"><i class="bi bi-x-lg"></i></button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
