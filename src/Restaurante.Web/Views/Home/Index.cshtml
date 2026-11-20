@@ -1,0 +1,93 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Tablero";
+    var r = Model.ResumenHoy;
+    var maximo = Model.VentasSemana.Values.DefaultIfEmpty(0).Max();
+    var libres = Model.Mesas.Count(m => m.Estado == EstadoMesa.Libre);
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h3 mb-0">Tablero del día</h1>
+    <span class="text-muted">@DateTime.Today.ToString("dddd, d 'de' MMMM")</span>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card kpi p-3 h-100"><div class="etiqueta">Ventas hoy</div><div class="valor text-marca">@r.Ventas.Pesos()</div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card kpi p-3 h-100"><div class="etiqueta">Facturas</div><div class="valor">@r.CantidadFacturas</div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card kpi p-3 h-100"><div class="etiqueta">Órdenes activas</div><div class="valor">@Model.OrdenesActivas.Count</div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card kpi p-3 h-100"><div class="etiqueta">Mesas libres</div><div class="valor">@libres / @Model.Mesas.Count</div></div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <div class="card p-3 h-100">
+            <h2 class="h6 mb-3">Ventas últimos 7 días</h2>
+            <div class="grafico-barras">
+                @foreach (var (dia, valor) in Model.VentasSemana)
+                {
+                    var alto = maximo == 0 ? 0 : (int)(valor / maximo * 100);
+                    <div class="barra-col" title="@dia.ToString("dd/MM"): @valor.Pesos()">
+                        <small class="text-muted d-none d-md-block">@((valor / 1000).ToString("0"))k</small>
+                        <div class="barra" style="height:@alto%"></div>
+                        <div class="dia">@dia.ToString("ddd")</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="card p-3 h-100">
+            <h2 class="h6 mb-3">Más vendidos (7 días)</h2>
+            <ol class="list-group list-group-flush list-group-numbered">
+                @foreach (var p in Model.TopProductos)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-start px-0">
+                        <div class="ms-2 me-auto">@p.Nombre</div>
+                        <span class="badge text-bg-secondary rounded-pill">@p.Cantidad</span>
+                    </li>
+                }
+            </ol>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 class="h6 mb-0">Órdenes en curso</h2>
+                <a asp-controller="Ordenes" asp-action="Crear" class="btn btn-sm btn-marca"><i class="bi bi-plus-lg"></i> Nueva orden</a>
+            </div>
+            @if (!Model.OrdenesActivas.Any())
+            {
+                <p class="text-muted mb-0">No hay órdenes activas.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>#</th><th>Mesa</th><th>Mesero</th><th>Estado</th><th class="text-end">Total</th><th class="d-none d-md-table-cell">Espera</th></tr></thead>
+                        <tbody>
+                            @foreach (var o in Model.OrdenesActivas)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Ordenes" asp-action="Detalle" asp-route-id="@o.Id">@o.Id</a></td>
+                                    <td>@o.Mesa?.Numero</td>
+                                    <td>@o.MeseroNombre</td>
+                                    <td><span class="badge text-bg-@o.Estado.ColorBootstrap()">@o.Estado.Nombre()</span></td>
+                                    <td class="text-end">@o.Total.Pesos()</td>
+                                    <td class="d-none d-md-table-cell">@o.MinutosEspera min</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
