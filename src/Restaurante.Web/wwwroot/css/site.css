@@ -1,0 +1,82 @@
+:root {
+    --color-marca: #b23a1e;
+    --color-marca-oscuro: #8c2c15;
+    --fondo: #faf7f2;
+}
+
+html { font-size: 15px; }
+@media (min-width: 768px) { html { font-size: 16px; } }
+
+body {
+    background: var(--fondo);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+main { flex: 1; }
+
+.barra-principal { background: var(--color-marca); }
+.barra-principal .nav-link.active { font-weight: 600; border-bottom: 2px solid #fff; }
+
+.btn-marca { background: var(--color-marca); border-color: var(--color-marca); color: #fff; }
+.btn-marca:hover, .btn-marca:focus { background: var(--color-marca-oscuro); border-color: var(--color-marca-oscuro); color: #fff; }
+.text-marca { color: var(--color-marca); }
+
+.card { border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+/* Tarjetas de indicadores del tablero */
+.kpi .valor { font-size: 1.6rem; font-weight: 700; }
+.kpi .etiqueta { font-size: .8rem; text-transform: uppercase; color: #6c757d; letter-spacing: .03em; }
+
+/* Plano de mesas */
+.mesa {
+    border-radius: 1rem;
+    text-align: center;
+    padding: 1rem .5rem;
+    color: #fff;
+    min-height: 110px;
+}
+.mesa .numero { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+.mesa-libre { background: #2e8b57; }
+.mesa-ocupada { background: #c0392b; }
+
+/* Barras del gráfico de ventas (CSS puro, sin librerías) */
+.grafico-barras { display: flex; align-items: flex-end; gap: .5rem; height: 180px; }
+.grafico-barras .barra-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.grafico-barras .barra { width: 100%; max-width: 48px; background: var(--color-marca); border-radius: .35rem .35rem 0 0; min-height: 2px; }
+.grafico-barras .dia { font-size: .75rem; color: #6c757d; margin-top: .25rem; }
+
+/* Formulario de nueva orden: selector de cantidad */
+.selector-cantidad { width: 120px; }
+.selector-cantidad input { text-align: center; }
+.producto-item.seleccionado { outline: 2px solid var(--color-marca); }
+
+/* Barra de total fija abajo en celulares */
+.total-fijo {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+    box-shadow: 0 -2px 6px rgba(0,0,0,.06);
+}
+
+/* Cocina */
+.ticket { border-left: 6px solid var(--bs-warning); }
+.ticket.preparando { border-left-color: var(--bs-info); }
+.ticket.lista { border-left-color: var(--bs-success); }
+
+/* Login */
+.login-fondo {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-card { width: 100%; max-width: 420px; }
+
+/* Factura imprimible */
+@media print {
+    nav, footer, .no-imprimir { display: none !important; }
+    body { background: #fff; }
+}
