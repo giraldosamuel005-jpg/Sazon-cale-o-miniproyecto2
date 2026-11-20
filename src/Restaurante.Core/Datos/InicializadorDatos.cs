@@ -23,7 +23,12 @@ public static class InicializadorDatos
 
     public static async Task InicializarAsync(RestauranteDbContext db)
     {
-        await db.Database.MigrateAsync();
+        // PostgreSQL (nube): migraciones de EF Core. SQLite (modo local sin internet): el esquema
+        // se crea directamente desde el modelo, porque las migraciones están generadas para PostgreSQL.
+        if (db.Database.IsNpgsql())
+            await db.Database.MigrateAsync();
+        else
+            await db.Database.EnsureCreatedAsync();
         await SembrarSeguridadAsync(db);
         await SembrarMesasAsync(db);
         await SembrarMenuAsync(db);

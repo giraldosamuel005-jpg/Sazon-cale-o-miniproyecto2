@@ -11,10 +11,11 @@ using Restaurante.Web.Infraestructura;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------- Base de datos (EF Core + SQLite compartido con el escritorio) ----------
-var cadena = builder.Configuration.GetConnectionString("Restaurante");
-builder.Services.AddDbContext<RestauranteDbContext>(o =>
-    o.UseSqlite(string.IsNullOrWhiteSpace(cadena) ? RutaBaseDatos.CadenaConexion : cadena));
+// ---------- Base de datos (EF Core, compartida con el escritorio) ----------
+// PostgreSQL en la nube si hay cadena (ConnectionStrings:Restaurante o variable SAZON_DB);
+// si no, SQLite local en %LOCALAPPDATA%\RestauranteApp.
+var cadena = ConexionBaseDatos.Resolver(builder.Configuration.GetConnectionString("Restaurante"));
+builder.Services.AddDbContext<RestauranteDbContext>(o => ConexionBaseDatos.Configurar(o, cadena));
 
 // ---------- ASP.NET Core Identity con roles ----------
 builder.Services

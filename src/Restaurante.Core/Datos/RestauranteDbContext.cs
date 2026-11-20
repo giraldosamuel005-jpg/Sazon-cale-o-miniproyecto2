@@ -20,16 +20,25 @@ public class RestauranteDbContext : IdentityDbContext<Usuario>
     public DbSet<DetalleOrden> DetallesOrden => Set<DetalleOrden>();
     public DbSet<Factura> Facturas => Set<Factura>();
 
-    /// <summary>Crea las opciones para SQLite apuntando al archivo compartido.</summary>
-    public static DbContextOptions<RestauranteDbContext> CrearOpciones(string? cadenaConexion = null) =>
-        new DbContextOptionsBuilder<RestauranteDbContext>()
-            .UseSqlite(cadenaConexion ?? RutaBaseDatos.CadenaConexion)
-            .Options;
+    /// <summary>
+    /// Crea las opciones del contexto: PostgreSQL en la nube si hay cadena configurada
+    /// (ver <see cref="ConexionBaseDatos"/>), o SQLite local si no.
+    /// </summary>
+    public static DbContextOptions<RestauranteDbContext> CrearOpciones(string? cadenaConexion = null)
+    {
+        var builder = new DbContextOptionsBuilder<RestauranteDbContext>();
+        ConexionBaseDatos.Configurar(builder, ConexionBaseDatos.Resolver(cadenaConexion));
+        return builder.Options;
+    }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         // SQLite no tiene tipo decimal nativo: se guarda como REAL para poder ordenar y comparar.
-        builder.Properties<decimal>().HaveConversion<double>();
+        // PostgreSQL sí tiene numeric, así que allí se deja el decimal exacto.
+        if (Database.IsSqlite())
+            builder.Properties<decimal>().HaveConversion<double>();
+        else
+            builder.Properties<decimal>().HavePrecision(14, 2);
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
