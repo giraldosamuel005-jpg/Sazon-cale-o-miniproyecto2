@@ -1,0 +1,30 @@
+@model List<Orden>
+@{
+    ViewData["Title"] = "Caja";
+}
+<h1 class="h3 mb-3">Caja · Órdenes por cobrar</h1>
+
+@if (!Model.Any())
+{
+    <div class="card p-5 text-center text-muted">
+        <i class="bi bi-cash-stack" style="font-size:3rem"></i>
+        <p class="mb-0">No hay órdenes entregadas pendientes de pago.</p>
+    </div>
+}
+
+<div class="row g-3">
+    @foreach (var o in Model)
+    {
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 p-3">
+                <div class="d-flex justify-content-between">
+                    <h2 class="h5 mb-0">Mesa @o.Mesa?.Numero</h2>
+                    <small class="text-muted">Orden #@o.Id</small>
+                </div>
+                <div class="small text-muted mb-2">@o.CantidadItems productos · @o.MeseroNombre</div>
+                <div class="fs-4 fw-bold text-marca mb-2">@o.Total.Pesos()</div>
+                <a asp-action="Cobrar" asp-route-id="@o.Id" class="btn btn-marca mt-auto"><i class="bi bi-cash"></i> Cobrar</a>
+            </div>
+        </div>
+    }
+</div>
