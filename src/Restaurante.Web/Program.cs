@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -16,6 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 // si no, SQLite local en %LOCALAPPDATA%\RestauranteApp.
 var cadena = ConexionBaseDatos.Resolver(builder.Configuration.GetConnectionString("Restaurante"));
 builder.Services.AddDbContext<RestauranteDbContext>(o => ConexionBaseDatos.Configurar(o, cadena));
+
+// Llaves de la cookie de sesión guardadas en la base de datos (sobreviven reinicios del servidor).
+builder.Services.AddDataProtection()
+    .SetApplicationName("SazonCaleno")
+    .PersistKeysToDbContext<RestauranteDbContext>();
 
 // ---------- ASP.NET Core Identity con roles ----------
 builder.Services

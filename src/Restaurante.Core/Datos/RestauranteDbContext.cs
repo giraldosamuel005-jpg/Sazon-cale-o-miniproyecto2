@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Restaurante.Core.Dominio;
@@ -10,7 +11,7 @@ namespace Restaurante.Core.Datos;
 /// de usuarios y roles (AspNetUsers, AspNetRoles...) vivan en la misma base de datos
 /// que el negocio. Lo usan tanto la aplicación web como la de escritorio.
 /// </summary>
-public class RestauranteDbContext : IdentityDbContext<Usuario>
+public class RestauranteDbContext : IdentityDbContext<Usuario>, IDataProtectionKeyContext
 {
     public RestauranteDbContext(DbContextOptions<RestauranteDbContext> options) : base(options) { }
 
@@ -19,6 +20,12 @@ public class RestauranteDbContext : IdentityDbContext<Usuario>
     public DbSet<Orden> Ordenes => Set<Orden>();
     public DbSet<DetalleOrden> DetallesOrden => Set<DetalleOrden>();
     public DbSet<Factura> Facturas => Set<Factura>();
+
+    /// <summary>
+    /// Llaves con las que la web cifra la cookie de sesión. Guardarlas en la base de datos
+    /// evita que todos los usuarios queden deslogueados cada vez que el servidor se reinicia.
+    /// </summary>
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     /// <summary>
     /// Crea las opciones del contexto: PostgreSQL en la nube si hay cadena configurada

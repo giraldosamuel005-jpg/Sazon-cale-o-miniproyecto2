@@ -11,6 +11,8 @@ RUN dotnet publish src/Restaurante.Web/Restaurante.Web.csproj -c Release -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
+# libgssapi: la pide Npgsql al arrancar (sin ella solo muestra un error en el log).
+RUN apt-get update && apt-get install -y --no-install-recommends libgssapi-krb5-2 && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app .
 # Hora de Colombia para fechas y reportes ("ventas de hoy").
 ENV TZ=America/Bogota \
