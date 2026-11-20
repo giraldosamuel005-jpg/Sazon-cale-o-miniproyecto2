@@ -7,7 +7,10 @@ Miniproyecto 2 · Lenguajes de Programación · Universidad Santiago de Cali · 
 Sistema para un restaurante pequeño: los meseros toman pedidos desde el celular o la tablet, la cocina los atiende
 en orden de llegada, la caja cobra con impuesto y propina, y el administrador gestiona el menú, las mesas, los usuarios
 y los reportes de ventas. La **aplicación web** y la **aplicación de escritorio** comparten la misma biblioteca de
-negocio y la misma base de datos.
+negocio y la misma base de datos **PostgreSQL en la nube**.
+
+**App web publicada:** https://sazon-caleno.onrender.com (PC, tablet y celular, desde cualquier red).
+> El plan gratuito de Render duerme el servidor tras 15 min sin uso: la primera visita puede tardar ~1 minuto.
 
 ## Arquitectura
 
@@ -32,15 +35,25 @@ Restaurante.slnx
              │                                   │
              └──────────► Restaurante.Core ◄─────┘
                          (dominio + servicios)
-                                  │  EF Core
+                                  │  EF Core (Npgsql)
                                   ▼
-                 SQLite: %LOCALAPPDATA%\RestauranteApp\restaurante.db
+             PostgreSQL en la nube (Neon) ── web publicada en Render (Docker)
 ```
+
+**Base de datos.** `ConexionBaseDatos` elige el proveedor según la cadena de conexión:
+- **PostgreSQL (Neon)** si hay cadena: variable de entorno `SAZON_DB`, `ConnectionStrings:Restaurante` en
+  `appsettings.json`, o un archivo `conexion.txt` junto al ejecutable. Acepta la URL que entrega Neon
+  (`postgresql://usuario:clave@servidor/base?sslmode=require`). Se aplican las migraciones de EF Core.
+- **SQLite local** (`%LOCALAPPDATA%\RestauranteApp\restaurante.db`) si no hay cadena: modo sin internet;
+  el esquema se crea desde el modelo.
+
+Así la web en la nube, la web local y el escritorio en cualquier PC ven los mismos pedidos en tiempo real.
 
 ## Tecnologías
 - .NET 10 / C# 14
 - ASP.NET Core MVC con ASP.NET Core Identity (inicio de sesión y roles)
-- Entity Framework Core 10 con SQLite y migraciones
+- Entity Framework Core 10 con PostgreSQL (Npgsql, Neon) y migraciones; SQLite como respaldo local
+- Docker + Render para publicar la web
 - Windows Forms (.NET 10)
 - Bootstrap 5 y Bootstrap Icons (diseño responsive para celular, tablet y PC)
 
@@ -77,6 +90,10 @@ Cualquier transición inválida (por ejemplo cobrar una orden que aún está en 
 
 ## Cómo ejecutar
 
+### Opción 0: en la nube (nada que instalar)
+Abra https://sazon-caleno.onrender.com en el PC, la tablet o el celular. El escritorio del paquete de Releases
+ya viene conectado a la misma base de datos en la nube.
+
 ### Opción A: ejecutables listos (no requiere instalar .NET)
 1. Descargue `SazonCaleno-App.zip` desde [Releases](https://github.com/giraldosamuel005-jpg/Sazon-cale-o-miniproyecto2/releases) y descomprímalo (Windows 10/11 de 64 bits).
 2. **Web:** doble clic en `Abrir app web.bat` (no cierre la ventana negra; el navegador se abre en `http://localhost:5186`).
@@ -99,8 +116,9 @@ dotnet run --project src/Restaurante.Desktop
 dotnet run -c Release --project tools/Restaurante.Comparativas
 ```
 
+Sin cadena de conexión usa SQLite local; para usar PostgreSQL defina la variable `SAZON_DB` con la URL de Neon.
 La base de datos se crea sola con migraciones y datos de ejemplo (10 mesas, 15 productos y una semana de ventas).
-Para empezar de cero, borre la carpeta `%LOCALAPPDATA%\RestauranteApp`.
+En modo local, para empezar de cero borre la carpeta `%LOCALAPPDATA%\RestauranteApp`.
 
 Para ver la web desde el celular en la misma red Wi‑Fi:
 ```bash
@@ -108,10 +126,10 @@ dotnet run --project src/Restaurante.Web --urls http://0.0.0.0:5186
 ```
 y abra `http://<IP-del-PC>:5186` en el celular.
 
-Para crear una nueva migración después de cambiar el modelo:
+Para crear una nueva migración después de cambiar el modelo (las migraciones son de PostgreSQL):
 ```bash
 dotnet tool restore
-dotnet dotnet-ef migrations add NombreCambio --project src/Restaurante.Core --startup-project src/Restaurante.Web --output-dir Datos/Migraciones
+SAZON_DB="Host=localhost;Database=x" dotnet dotnet-ef migrations add NombreCambio --project src/Restaurante.Core --startup-project src/Restaurante.Web --output-dir Datos/Migraciones
 ```
 
 ## Características de C# y .NET utilizadas
@@ -124,5 +142,5 @@ dotnet dotnet-ef migrations add NombreCambio --project src/Restaurante.Core --st
 - **Estructuras de datos:** `List`, `Dictionary`, `Queue`, `HashSet`, `SortedDictionary`, `StringBuilder` (ver [docs/ESTRUCTURAS_DE_DATOS.md](docs/ESTRUCTURAS_DE_DATOS.md)).
 - **ASP.NET Core:** MVC, inyección de dependencias, filtros globales de autorización, `[Authorize(Roles=…)]`, tag helpers, validación con DataAnnotations, antiforgery, localización `es-CO`.
 - **Identity:** `UserManager`, `SignInManager`, roles, claims personalizados y el mismo `PasswordHasher` reutilizado en escritorio.
-- **EF Core:** Code First, migraciones, relaciones 1‑N y 1‑1, índices, conversión de tipos, carga de datos iniciales.
+- **EF Core:** Code First, migraciones, dos proveedores (PostgreSQL y SQLite) con el mismo modelo, llaves de sesión de Data Protection en la base, relaciones 1‑N y 1‑1, índices, conversión de tipos, carga de datos iniciales.
 - **WinForms:** controles creados por código, `DataGridView` con enlace de datos, `Timer`, un control propio dibujado con GDI+ (`GraficoBarras`) y formularios modales.
