@@ -1,0 +1,44 @@
+@model List<Mesa>
+@{
+    ViewData["Title"] = "Mesas";
+    var esAdmin = User.IsInRole(Roles.Admin);
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <div>
+        <h1 class="h3 mb-0">Plano de mesas</h1>
+        <small class="text-muted">
+            <span class="badge mesa-libre">Libre</span> @Model.Count(m => m.Estado == EstadoMesa.Libre)
+            <span class="badge mesa-ocupada ms-2">Ocupada</span> @Model.Count(m => m.Estado == EstadoMesa.Ocupada)
+        </small>
+    </div>
+    @if (esAdmin)
+    {
+        <a asp-action="Crear" class="btn btn-marca"><i class="bi bi-plus-lg"></i> Nueva mesa</a>
+    }
+</div>
+
+<div class="row g-3">
+    @foreach (var m in Model)
+    {
+        var libre = m.Estado == EstadoMesa.Libre;
+        <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+            <div class="mesa @(libre ? "mesa-libre" : "mesa-ocupada")">
+                <div class="numero">@m.Numero</div>
+                <div class="small"><i class="bi bi-people"></i> @m.Capacidad · @(libre ? "Libre" : "Ocupada")</div>
+                <div class="mt-2 d-flex justify-content-center gap-1">
+                    @if (libre)
+                    {
+                        <a asp-controller="Ordenes" asp-action="Crear" asp-route-mesaId="@m.Id" class="btn btn-sm btn-light">Tomar orden</a>
+                    }
+                    @if (esAdmin)
+                    {
+                        <a asp-action="Editar" asp-route-id="@m.Id" class="btn btn-sm btn-outline-light" title="Editar"><i class="bi bi-pencil"></i></a>
+                        <form asp-action="Eliminar" asp-route-id="@m.Id" method="post" onsubmit="return confirm('¿Eliminar la mesa @m.Numero?');">
+                            <button class="btn btn-sm btn-outline-light" title="Eliminar"><i class="bi bi-trash"></i></button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
