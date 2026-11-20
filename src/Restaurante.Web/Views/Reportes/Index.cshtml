@@ -1,0 +1,85 @@
+@model ReporteViewModel
+@{
+    ViewData["Title"] = "Reportes";
+    var r = Model.Resumen;
+}
+<h1 class="h3 mb-3">Reporte de ventas</h1>
+
+<form method="get" class="card p-3 mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-4">
+            <label class="form-label small" for="desde">Desde</label>
+            <input type="date" id="desde" name="desde" value="@Model.Desde.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-6 col-md-4">
+            <label class="form-label small" for="hasta">Hasta</label>
+            <input type="date" id="hasta" name="hasta" value="@Model.Hasta.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col-12 col-md-4 d-grid">
+            <button class="btn btn-marca"><i class="bi bi-funnel"></i> Filtrar</button>
+        </div>
+    </div>
+</form>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-lg-3"><div class="card kpi p-3 h-100"><div class="etiqueta">Ventas</div><div class="valor text-marca">@r.Ventas.Pesos()</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card kpi p-3 h-100"><div class="etiqueta">Facturas</div><div class="valor">@r.CantidadFacturas</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card kpi p-3 h-100"><div class="etiqueta">Ticket promedio</div><div class="valor">@r.TicketPromedio.Pesos()</div></div></div>
+    <div class="col-6 col-lg-3"><div class="card kpi p-3 h-100"><div class="etiqueta">Propinas</div><div class="valor">@r.Propinas.Pesos()</div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-12 col-md-5">
+        <div class="card p-3 h-100">
+            <h2 class="h6">Por método de pago</h2>
+            @foreach (var (metodo, valor) in r.PorMetodoPago)
+            {
+                var pct = r.Ventas == 0 ? 0 : (int)(valor / r.Ventas * 100);
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between small"><span>@metodo.Nombre()</span><span>@valor.Pesos() (@pct %)</span></div>
+                    <div class="progress" role="progressbar" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar" style="width:@pct%; background:var(--color-marca)"></div>
+                    </div>
+                </div>
+            }
+            <div class="small text-muted mt-2">Impoconsumo recaudado: @r.Impuestos.Pesos()</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-7">
+        <div class="card p-3 h-100">
+            <h2 class="h6">Top 10 productos</h2>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Producto</th><th class="d-none d-sm-table-cell">Categoría</th><th class="text-center">Und.</th><th class="text-end">Total</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in Model.TopProductos)
+                        {
+                            <tr><td>@p.Nombre</td><td class="d-none d-sm-table-cell">@p.Categoria.Nombre()</td><td class="text-center">@p.Cantidad</td><td class="text-end">@p.Total.Pesos()</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white"><h2 class="h6 mb-0">Facturas del periodo</h2></div>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0">
+            <thead class="table-light"><tr><th>#</th><th>Fecha</th><th>Mesa</th><th class="d-none d-md-table-cell">Pago</th><th class="text-end">Total</th></tr></thead>
+            <tbody>
+                @foreach (var f in Model.Facturas)
+                {
+                    <tr>
+                        <td><a asp-controller="Facturas" asp-action="Ver" asp-route-id="@f.Id">@f.Id</a></td>
+                        <td class="text-nowrap">@f.CreadoEn.ToString("dd/MM hh:mm tt")</td>
+                        <td>@f.Orden?.Mesa?.Numero</td>
+                        <td class="d-none d-md-table-cell">@f.MetodoPago.Nombre()</td>
+                        <td class="text-end">@f.Total.Pesos()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+@model List<UsuarioListadoViewModel>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <h1 class="h3 mb-0">Usuarios y roles</h1>
+    <a asp-action="Crear" class="btn btn-marca"><i class="bi bi-person-plus"></i> Nuevo usuario</a>
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="table-light"><tr><th>Nombre</th><th class="d-none d-md-table-cell">Correo</th><th>Rol</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.Nombre<div class="small text-muted d-md-none">@u.Email</div></td>
+                        <td class="d-none d-md-table-cell">@u.Email</td>
+                        <td>@foreach (var rol in u.Roles) { <span class="badge text-bg-secondary me-1">@rol</span> }</td>
+                        <td class="text-end">
+                            <form asp-action="Eliminar" asp-route-id="@u.Id" method="post" onsubmit="return confirm('¿Eliminar a @u.Email?');">
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
