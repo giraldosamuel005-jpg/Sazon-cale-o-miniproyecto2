@@ -77,6 +77,15 @@ Cualquier transición inválida (por ejemplo cobrar una orden que aún está en 
 
 ## Cómo ejecutar
 
+### Opción A: ejecutables listos (no requiere instalar .NET)
+1. Descargue `SazonCaleno-App.zip` desde [Releases](https://github.com/giraldosamuel005-jpg/Sazon-cale-o-miniproyecto2/releases) y descomprímalo (Windows 10/11 de 64 bits).
+2. **Web:** doble clic en `Abrir app web.bat` (no cierre la ventana negra; el navegador se abre en `http://localhost:5186`).
+3. **Escritorio:** doble clic en `Abrir app escritorio.bat`.
+4. **Celular/tablet:** `Abrir app web (celular por WiFi).bat` y abra en el celular la dirección que muestra la ventana.
+
+Si aparece "Windows protegió su PC": *Más información* → *Ejecutar de todas formas*.
+
+### Opción B: desde el código fuente
 Requisitos: SDK de .NET 10 y Windows (para la app de escritorio).
 
 ```bash
