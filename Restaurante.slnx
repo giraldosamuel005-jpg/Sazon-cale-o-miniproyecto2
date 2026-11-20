@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Restaurante.Core/Restaurante.Core.csproj" />
+    <Project Path="src/Restaurante.Desktop/Restaurante.Desktop.csproj" />
+    <Project Path="src/Restaurante.Web/Restaurante.Web.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Restaurante.Comparativas/Restaurante.Comparativas.csproj" />
+  </Folder>
+</Solution>
