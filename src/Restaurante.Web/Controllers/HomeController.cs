@@ -1,3 +1,9 @@
+// ======================================================================
+// Sazón Caleño · Sistema de órdenes para restaurante
+// Miniproyecto 2 · Lenguajes de Programación · Universidad Santiago de Cali · 2026
+// Autores: Ángel David Gómez Gómez · Samuel Darío Giraldo Paz
+// ======================================================================
+
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

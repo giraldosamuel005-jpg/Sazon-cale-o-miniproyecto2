@@ -2,7 +2,7 @@
 
 Miniproyecto 2 · Lenguajes de Programación · Universidad Santiago de Cali · 2026-B
 
-**Integrantes:** Samuel Darío Giraldo P. · Angel David Gómez G.
+**Integrantes:** Ángel David Gómez Gómez · Samuel Darío Giraldo Paz
 
 Sistema para un restaurante pequeño: los meseros toman pedidos desde el celular o la tablet, la cocina los atiende
 en orden de llegada, la caja cobra con impuesto y propina, y el administrador gestiona el menú, las mesas, los usuarios

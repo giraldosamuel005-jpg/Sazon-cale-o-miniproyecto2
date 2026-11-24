@@ -1,4 +1,10 @@
-﻿// =====================================================================================
+﻿// ======================================================================
+// Sazón Caleño · Sistema de órdenes para restaurante
+// Miniproyecto 2 · Lenguajes de Programación · Universidad Santiago de Cali · 2026
+// Autores: Ángel David Gómez Gómez · Samuel Darío Giraldo Paz
+// ======================================================================
+
+// =====================================================================================
 //  Comparativas de estructuras de datos — Miniproyecto 2 (Sazón Caleño)
 //  Mide con Stopwatch las alternativas que se evaluaron para cada caso del sistema
 //  y muestra por qué se eligió cada estructura. Ejecutar en Release:
